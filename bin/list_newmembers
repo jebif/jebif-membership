@@ -4,7 +4,7 @@
 from membership.models import *
 
 infos = MembershipInfo.objects.filter(active=True, deleted=False, 
-				inscription_date=datetime.date.today()-datetime.timedelta(0))
+				inscription_date=datetime.date.today()-datetime.timedelta(1))
 
 for info in infos :
 	print (("%s %s <%s>" % (info.firstname, info.lastname, info.email)).encode('utf-8'))
