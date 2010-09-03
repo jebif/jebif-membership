@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="{{ MEDIA_URL }}css/jebif.css" type="text/css"/>
+		<title>Administration des demandes d'adhésion</title>
+	</head>
+	<body>
+
+{% autoescape on %}
+{% if infos %}
+	<h1>Demandes d'adhésion</h1>
+	<table border="1">
+		<tr>
+			<th>Prénom</th><th>Nom</th><th>E-mail</th><th>Date d'inscription</th>
+		</tr>
+	{% for info in infos %}
+		<tr>
+			<td>{{ info.firstname }}</td>
+			<td>{{ info.lastname }}</td>
+			<td>{{ info.email }}</td>
+			<td>{{ info.inscription_date }}</td>
+			<td>
+				<a href="accept/{{ info.id }}/">accepter</a> /
+				<a href="reject/{{ info.id }}/">supprimer</a>
+			</td>
+		</tr>
+	{% endfor %}
+	</table>
+
+{% else %}
+	Aucune demande à modérer&nbsp;!
+{% endif %}
+{% endautoescape %}
+	</body>
+</html>
+

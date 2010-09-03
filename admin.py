@@ -6,7 +6,7 @@ from membership.models import *
 
 class MembershipInfoAdmin( admin.ModelAdmin ) :
 #	inlines = [MembershipInline]
-	list_display = ('firstname', 'lastname', 'email', 'user', 'active', 'inscription_date')
+	list_display = ('firstname', 'lastname', 'email', 'user', 'active', 'inscription_date', 'deleted')
 
 #admin.site.register(Membership)
 admin.site.register(MembershipInfo, MembershipInfoAdmin)
