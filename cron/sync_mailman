@@ -1,2 +1,2 @@
 #!/bin/bash
-`dirname $0`/../bin/list_newmembers | /usr/lib/mailman/bin/add_members -r - Membres
+`dirname $0`/../bin/list_newmembers | iconv -t latin1 | /usr/lib/mailman/bin/add_members -r - Membres
