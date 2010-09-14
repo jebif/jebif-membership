@@ -11,6 +11,8 @@ from membership.forms import *
 
 from jebif import settings
 
+import datetime
+
 def subscription( request ) :
 	if request.method == 'POST' :
 		form = MembershipInfoForm(request.POST)
@@ -46,6 +48,7 @@ def admin_subscription( request ) :
 def admin_subscription_accept( request, info_id ) :
 	info = MembershipInfo.objects.get(id=info_id)
 	info.active = True
+	info.inscription_date = datetime.date.today()
 	info.save()
 
 	msg_from = "NO-REPLY@jebif.fr"

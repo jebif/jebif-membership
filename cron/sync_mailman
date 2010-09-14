@@ -1,2 +1,5 @@
 #!/bin/bash
-`dirname $0`/../bin/list_newmembers | iconv -t latin1 | /usr/lib/mailman/bin/add_members -r - Membres
+tmpfile=`mktemp`
+`dirname $0`/../bin/list_newmembers | iconv -t latin1 > $tmpfile
+[ -s $tmpfile ] && /usr/lib/mailman/bin/add_members -r $tmpfile Membres
+rm -f $tmpfile
