@@ -6,6 +6,9 @@ from django.views.generic.simple import direct_to_template
 
 from django.contrib.auth.decorators import user_passes_test
 
+import codecs
+import csv
+
 from membership.models import *
 from membership.forms import *
 
@@ -78,4 +81,26 @@ def admin_subscription_reject( request, info_id ) :
 	info.deleted = True
 	info.save()
 	return HttpResponseRedirect("../../")
+
+@is_admin()
+def admin_export_csv( request ) :
+	charset = 'utf-8'
+	response = HttpResponse(mimetype='text/csv')
+	response['Content-Disposition'] = 'attachment; filename=membres_jebif.csv'
+
+	writer = csv.writer(response)
+	writer.writerow(['Nom', 'Prénom', 'Laboratoire', 'Ville',
+		'Pays', 'Poste actuel', 'Motivation', 'Date inscription'])
+
+	infos = MembershipInfo.objects.filter(active=True).order_by('lastname')
+	e = lambda s : s.encode(charset)
+	for i in infos :
+		writer.writerow(map(e, [i.lastname, i.firstname, 
+			i.laboratory_name, i.laboratory_city,
+			i.laboratory_country, i.position,
+			i.motivation.replace("\r\n", " -- "),
+			i.inscription_date.isoformat()]))
+
+	return response
+
 
