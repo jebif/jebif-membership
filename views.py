@@ -89,14 +89,15 @@ def admin_export_csv( request ) :
 	response['Content-Disposition'] = 'attachment; filename=membres_jebif.csv'
 
 	writer = csv.writer(response)
-	writer.writerow(['Nom', 'Prénom', 'Laboratoire', 'Ville',
-		'Pays', 'Poste actuel', 'Motivation', 'Date inscription'])
+	writer.writerow(['Nom', 'Prénom', 'E-mail',
+		'Laboratoire', 'Ville', 'Pays', 'Poste actuel',
+		'Motivation', 'Date inscription'])
 
 	infos = MembershipInfo.objects.filter(active=True).order_by('lastname')
 	e = lambda s : s.encode(charset)
 	for i in infos :
 		writer.writerow(map(e, [i.lastname, i.firstname, 
-			i.laboratory_name, i.laboratory_city,
+			i.email, i.laboratory_name, i.laboratory_city,
 			i.laboratory_country, i.position,
 			i.motivation.replace("\r\n", " -- "),
 			i.inscription_date.isoformat()]))
