@@ -28,7 +28,9 @@ def subscription( request ) :
 Une demande d'adhésion vient d'être postée sur le site. Pour la modérer :
 	%s
 """ % ("http://jebif.fr/%smembership/admin/subscription/" % settings.ROOT_URL)
-			mail_managers(msg_subj, msg_txt, fail_silently=True)
+			send_mail(settings.EMAIL_SUBJECT_PREFIX + msg_subj, msg_txt, 
+				settings.SERVER_EMAIL, [a[1] for a in settings.MEMBERSHIP_MANAGERS],
+				fail_silently=True)
 
 			return HttpResponseRedirect("ok")
 	else :
