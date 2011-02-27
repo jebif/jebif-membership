@@ -1,5 +1,6 @@
 # -*- coding: utf-8
 
+from django.conf import settings
 from django.core.mail import *
 from django.shortcuts import *
 from django.views.generic.simple import direct_to_template
@@ -11,8 +12,6 @@ import csv
 
 from membership.models import *
 from membership.forms import *
-
-from jebif import settings
 
 import datetime
 
@@ -42,8 +41,14 @@ Une demande d'adhésion vient d'être postée sur le site. Pour la modérer :
 @login_required
 def subscription_renew( req, info_id ) :
 	info = MembershipInfo.objects.get(id=info_id)
-	assert info.user == req.user
-	membership = Membership.objects.filter(info=info).order_by("-date_begin")[0]
+
+	if info.user != req.user :
+		path = urlquote(req.get_full_path())
+		from django.contrib.auth import REDIRECT_FIELD_NAME
+		tup = settings.LOGIN_URL, REDIRECT_FIELD_NAME, path
+		return HttpResponseRedirect('%s?%s=%s' % tup)
+
+	membership = info.latter_membership()
 
 	today = datetime.date.today()
 
@@ -56,7 +61,7 @@ def subscription_renew( req, info_id ) :
 		if form.is_valid() :
 			form.save()
 			m = Membership(info=info)
-			if membership.date_end < today :
+			if membership.has_expired() :
 				m.init_date(today)
 			else :
 				m.init_date(membership.date_end + datetime.timedelta(1))
@@ -78,7 +83,7 @@ def is_admin() :
 
 @is_admin()
 def admin_subscription( request ) :
-	infos = MembershipInfo.objects.filter(active=False, deleted=False)
+	infos = MembershipInfo.objects.filter(active=False, deleted=False, membership=None)
 	return direct_to_template(request, "membership/admin_subscription.html", {"infos": infos})
 
 @is_admin()
@@ -103,7 +108,7 @@ http://www.iscbsc.org/rsg/rsg-france
 Tu vas être inscrit à la liste de discussion des membres de l’association. Tu pourras y consulter les archives si tu le souhaites.
 http://lists.jebif.fr/mailman/listinfo/membres
 
-A bientôt,
+À bientôt,
 L’équipe du RSG-France (JeBiF)
 """ % info.firstname
 	send_mail(msg_subj, msg_txt, msg_from, msg_to)

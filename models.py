@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import random
 
 from django.db import models
+from django.db import IntegrityError
 from django.contrib.auth.models import User
+from django.template.defaultfilters import slugify
 
 VERSION = 1
 
@@ -23,6 +24,9 @@ class MembershipInfo( models.Model ) :
 	active = models.BooleanField(default=False)
 	deleted = models.BooleanField(default=False)
 
+	def latter_membership( self ) :
+		return Membership.objects.filter(info=self).order_by("-date_begin")[0]
+
 	def make_user( self ) :
 		if self.user is not None :
 			return None
@@ -37,8 +41,19 @@ class MembershipInfo( models.Model ) :
 			self.save()
 			return None
 		else :
-			passwd = "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789") for i in range(8)])
-			self.user = User.create_user(self.email, self.email, passwd)
+			passwd = User.objects.make_random_password(8)
+			base_login = slugify(self.firstname)[0] + \
+							slugify(self.lastname)[:7]
+			login = base_login
+			salt = 2
+			created = False
+			while not created :
+				try :
+					self.user = User.objects.create_user(login, self.email, passwd)
+					created = True
+				except IntegrityError :
+					login = base_login + "%d" % salt
+					salt += 1
 			self.save()
 			return passwd
 
@@ -65,6 +80,12 @@ class Membership( models.Model ) :
 	def init_date( self, date_begin ) :
 		self.date_begin = date_begin
 		self.date_end = end_membership(self.date_begin)
+	
+	def has_expired( self ) :
+		return self.date_end < datetime.date.today()
+	
+	def expire_delta( self ) :
+		return self.date_end - datetime.date.today() + datetime.timedelta(1)
 
 	@classmethod
 	def current_objects( celf ) :
@@ -73,7 +94,7 @@ class Membership( models.Model ) :
 					date_begin__lte=today, date_end__gt=today)
 
 	def __unicode__( self ) :
-		return "%s/%s %s" % (self.date_begin, self.date_end, self.info)
+		return u"%s/%s %s" % (self.date_begin, self.date_end, self.info)
 
 
 class DatabaseInfo( models.Model ) : 
