@@ -27,7 +27,10 @@ for info in MembershipInfo.objects.filter(active=True) :
 		expire.append(m)
 
 for m in expired :
-	subprocess.call(["/usr/lib/mailman/bin/remove_members", "Membres", m.info.email])
+	try :
+		subprocess.call(["/usr/lib/mailman/bin/remove_members", "Membres", m.info.email])
+	except :
+		pass
 	m.info.active = False
 	m.info.save()
 

@@ -63,11 +63,14 @@ def subscription_renew( req, info_id ) :
 			m = Membership(info=info)
 			if membership.has_expired() :
 				m.init_date(today)
+				info.inscription_date = today
+				info.active = True
+				info.save()
 			else :
 				m.init_date(membership.date_end + datetime.timedelta(1))
 			m.save()
 			return direct_to_template(req, "membership/subscription_renewed.html", 
-				{"membership" : membership})
+				{"membership" : m})
 	else :
 		form = MembershipInfoForm(instance=info)
 
