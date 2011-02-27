@@ -55,6 +55,7 @@ def admin_subscription_accept( request, info_id ) :
 	info.active = True
 	info.inscription_date = datetime.date.today()
 	info.save()
+	Membership.objects.create(info=info)
 
 	msg_from = "NO-REPLY@jebif.fr"
 	msg_to = [info.email]
