@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import random
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -22,6 +23,25 @@ class MembershipInfo( models.Model ) :
 	active = models.BooleanField(default=False)
 	deleted = models.BooleanField(default=False)
 
+	def make_user( self ) :
+		if self.user is not None :
+			return None
+		# 1. try to find a User matching email
+		matching = User.objects.filter(email=self.email, is_active=True)
+		if matching :
+			self.user = matching[0]
+			if len(matching) > 1 :
+				matching2 = matching.filter(is_staff=False)
+				if matching2 :
+					self.user = matching2[0]
+			self.save()
+			return None
+		else :
+			passwd = "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789") for i in range(8)])
+			self.user = User.create_user(self.email, self.email, passwd)
+			self.save()
+			return passwd
+
 	def __unicode__( self ) :
 		return "%s %s <%s>%s" % (self.firstname, self.lastname,
 								self.email, "" if self.active else " (inactive)")
@@ -31,15 +51,20 @@ def end_membership(base=None) :
 	if d is None :
 		d = datetime.date.today()
 	try :
-		return datetime.date(d.year+1,d.month,d.day)
+		end = datetime.date(d.year+1,d.month,d.day)
 	except ValueError :
-		return datetime.date(d.year+1,d.month,d.day-1)
+		end = datetime.date(d.year+1,d.month,d.day-1)
+	return end - datetime.timedelta(1)
 
 
 class Membership( models.Model ) :
 	info = models.ForeignKey(MembershipInfo)
 	date_begin = models.DateField(default=datetime.date.today)
 	date_end = models.DateField(default=end_membership)
+
+	def init_date( self, date_begin ) :
+		self.date_begin = date_begin
+		self.date_end = end_membership(self.date_begin)
 
 	@classmethod
 	def current_objects( celf ) :

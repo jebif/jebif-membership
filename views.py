@@ -4,7 +4,7 @@ from django.core.mail import *
 from django.shortcuts import *
 from django.views.generic.simple import direct_to_template
 
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import *
 
 import codecs
 import csv
@@ -37,6 +37,38 @@ Une demande d'adhésion vient d'être postée sur le site. Pour la modérer :
 		form = MembershipInfoForm()
 
 	return direct_to_template(request, "membership/subscription.html", {"form": form})
+
+
+@login_required
+def subscription_renew( req, info_id ) :
+	info = MembershipInfo.objects.get(id=info_id)
+	assert info.user == req.user
+	membership = Membership.objects.filter(info=info).order_by("-date_begin")[0]
+
+	today = datetime.date.today()
+
+	if membership.date_begin >= today :
+		return direct_to_template(req, "membership/subscription_renewed.html", {
+			"membership" : membership})
+
+	if req.method == 'POST' :
+		form = MembershipInfoForm(req.POST, instance=info)
+		if form.is_valid() :
+			form.save()
+			m = Membership(info=info)
+			if membership.date_end < today :
+				m.init_date(today)
+			else :
+				m.init_date(membership.date_end + datetime.timedelta(1))
+			m.save()
+			return direct_to_template(req, "membership/subscription_renewed.html", 
+				{"membership" : membership})
+	else :
+		form = MembershipInfoForm(instance=info)
+
+	return direct_to_template(req, "membership/subscription_renew.html", 
+		{"form": form, "membership": membership, "today": today})
+
 
 
 def is_admin() :
