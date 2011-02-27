@@ -93,7 +93,7 @@ def admin_export_csv( request ) :
 		'Laboratoire', 'Ville', 'Pays', 'Poste actuel',
 		'Motivation', 'Date inscription'])
 
-	infos = MembershipInfo.objects.filter(active=True).order_by('lastname')
+	infos = MembershipInfo.objects.filter(active=True).extra(select={'ord':'lower(lastname)'}).order_by('ord')
 	e = lambda s : s.encode(charset)
 	for i in infos :
 		writer.writerow(map(e, [i.lastname, i.firstname, 
