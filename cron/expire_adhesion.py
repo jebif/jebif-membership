@@ -6,6 +6,8 @@ import datetime
 ALERT_1 = datetime.timedelta(30)
 ALERT_2 = datetime.timedelta(2)
 
+import subprocess
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
@@ -25,6 +27,7 @@ for info in MembershipInfo.objects.filter(active=True) :
 		expire.append(m)
 
 for m in expired :
+	subprocess.call(["/usr/lib/mailman/bin/remove_members", "Membres", m.info.email])
 	m.info.active = False
 	m.info.save()
 
