@@ -8,7 +8,6 @@ class MembershipInline( admin.TabularInline ) :
 class MembershipInfoAdmin( admin.ModelAdmin ) :
 	inlines = [MembershipInline]
 	list_display = ('firstname', 'lastname', 'email', 'user', 'active', 'inscription_date', 'laboratory_city', 'laboratory_cp', 'deleted')
-	list_editable = ('laboratory_cp',)
 	list_filter = ('active', 'deleted')
 
 admin.site.register(MembershipInfo, MembershipInfoAdmin)
