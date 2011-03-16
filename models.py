@@ -16,7 +16,7 @@ class MembershipInfo( models.Model ) :
 	lastname = models.CharField("Nom", max_length=75)
 	laboratory_name = models.CharField("Laboratoire", max_length=75)
 	laboratory_city = models.CharField("Ville", max_length=75)
-	laboratory_cp = models.CharField("Code Postal", max_length=7)
+	laboratory_cp = models.CharField("Code Postal", max_length=7, blank=True)
 	laboratory_country = models.CharField("Pays", max_length=75)
 	position = models.CharField("Poste actuel", max_length=75)
 	motivation = models.TextField("Motivation pour adhérer", blank=True)
