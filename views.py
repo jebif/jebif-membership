@@ -1,18 +1,17 @@
 # -*- coding: utf-8
 
+from django.conf import settings
 from django.core.mail import *
 from django.shortcuts import *
 from django.views.generic.simple import direct_to_template
 
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import *
 
 import codecs
 import csv
 
 from membership.models import *
 from membership.forms import *
-
-from jebif import settings
 
 import datetime
 
@@ -39,6 +38,47 @@ Une demande d'adhésion vient d'être postée sur le site. Pour la modérer :
 	return direct_to_template(request, "membership/subscription.html", {"form": form})
 
 
+@login_required
+def subscription_renew( req, info_id ) :
+	info = MembershipInfo.objects.get(id=info_id)
+
+	if info.user != req.user :
+		path = urlquote(req.get_full_path())
+		from django.contrib.auth import REDIRECT_FIELD_NAME
+		tup = settings.LOGIN_URL, REDIRECT_FIELD_NAME, path
+		return HttpResponseRedirect('%s?%s=%s' % tup)
+
+	membership = info.latter_membership()
+
+	today = datetime.date.today()
+
+	if membership.date_begin >= today :
+		return direct_to_template(req, "membership/subscription_renewed.html", {
+			"membership" : membership})
+
+	if req.method == 'POST' :
+		form = MembershipInfoForm(req.POST, instance=info)
+		if form.is_valid() :
+			form.save()
+			m = Membership(info=info)
+			if membership.has_expired() :
+				m.init_date(today)
+				info.inscription_date = today
+				info.active = True
+				info.save()
+			else :
+				m.init_date(membership.date_end + datetime.timedelta(1))
+			m.save()
+			return direct_to_template(req, "membership/subscription_renewed.html", 
+				{"membership" : m})
+	else :
+		form = MembershipInfoForm(instance=info)
+
+	return direct_to_template(req, "membership/subscription_renew.html", 
+		{"form": form, "membership": membership, "today": today})
+
+
+
 def is_admin() :
 	def validate( u ) :
 		return u.is_authenticated() and u.is_staff
@@ -46,7 +86,7 @@ def is_admin() :
 
 @is_admin()
 def admin_subscription( request ) :
-	infos = MembershipInfo.objects.filter(active=False, deleted=False)
+	infos = MembershipInfo.objects.filter(active=False, deleted=False, membership=None)
 	return direct_to_template(request, "membership/admin_subscription.html", {"infos": infos})
 
 @is_admin()
@@ -55,6 +95,7 @@ def admin_subscription_accept( request, info_id ) :
 	info.active = True
 	info.inscription_date = datetime.date.today()
 	info.save()
+	Membership.objects.create(info=info)
 
 	msg_from = "NO-REPLY@jebif.fr"
 	msg_to = [info.email]
@@ -70,7 +111,7 @@ http://www.iscbsc.org/rsg/rsg-france
 Tu vas être inscrit à la liste de discussion des membres de l’association. Tu pourras y consulter les archives si tu le souhaites.
 http://lists.jebif.fr/mailman/listinfo/membres
 
-A bientôt,
+À bientôt,
 L’équipe du RSG-France (JeBiF)
 """ % info.firstname
 	send_mail(msg_subj, msg_txt, msg_from, msg_to)
@@ -95,7 +136,7 @@ def admin_export_csv( request ) :
 		'Laboratoire', 'Ville', 'Pays', 'Poste actuel',
 		'Motivation', 'Date inscription'])
 
-	infos = MembershipInfo.objects.filter(active=True).order_by('lastname')
+	infos = MembershipInfo.objects.filter(active=True).extra(select={'ord':'lower(lastname)'}).order_by('ord')
 	e = lambda s : s.encode(charset)
 	for i in infos :
 		writer.writerow(map(e, [i.lastname, i.firstname, 

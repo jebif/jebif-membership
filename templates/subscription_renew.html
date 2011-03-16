@@ -8,16 +8,27 @@
 	</head>
 	<body>
 
-<h1>Demande d'adhésion à l'association JeBiF</h1>
+<h1>Renouvellement de l'adhésion à l'association JeBiF</h1>
 
-<p>Merci de remplir le formulaire suivant pour devenir membre de l'association <a href="http://www.jebif.fr">JeBiF</a>.</p>
+<p>Ton adhésion
+{% if membership.date_end < today %}
+	a expirée
+{% else %}
+	expire
+{% endif %}
+le <b>{{ membership.date_end|date }}</b>.</p>
 
 <form action="." method="post">
+	<p>Pour la prolonger d'un an, merci de mettre à jour tes informations:</p>
 	{% if form.errors %}
 		<p class="errornote">Merci de corriger les erreurs ci-dessous.</p>
 	{% endif %}
-	<table class="form">{{ form.as_table }}</table>
-	<p><input type="submit" value="Demander une adhésion pour un an"/></p>
+	<table class="form">{{ form.as_table }}</table><p>
+{% if membership.date_end < today %}
+	<input type="submit" value="Renouveller mon adhésion pour un an"/>
+{% else %}
+	<input type="submit" value="Prolonger mon adhésion d'un an"/>
+{% endif %}</p>
 </form>
 
 	</body>
