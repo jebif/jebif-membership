@@ -2,6 +2,7 @@
 
 from django.conf import settings
 from django.core.mail import *
+from django.db.transaction import commit_on_success
 from django.shortcuts import *
 from django.views.generic.simple import direct_to_template
 
@@ -91,11 +92,12 @@ def admin_subscription( request ) :
 
 @is_admin()
 def admin_subscription_accept( request, info_id ) :
-	info = MembershipInfo.objects.get(id=info_id)
-	info.active = True
-	info.inscription_date = datetime.date.today()
-	info.save()
-	Membership.objects.create(info=info)
+	with commit_on_success() :
+		info = MembershipInfo.objects.get(id=info_id)
+		info.active = True
+		info.inscription_date = datetime.date.today()
+		info.save()
+		Membership.objects.create(info=info)
 
 	msg_from = "NO-REPLY@jebif.fr"
 	msg_to = [info.email]
