@@ -122,7 +122,7 @@ L’équipe du RSG-France (JeBiF)
 
 @is_admin()
 def admin_subscription_reject( request, info_id ) :
-	info = MembershipInfo.objects.get(id=info_id)
+	info = get_object_or_404(MembershipInfo, id=info_id)
 	info.deleted = True
 	info.save()
 	return HttpResponseRedirect("../../")

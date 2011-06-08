@@ -26,7 +26,11 @@ class MembershipInfo( models.Model ) :
 	deleted = models.BooleanField(default=False)
 
 	def latter_membership( self ) :
-		return Membership.objects.filter(info=self).order_by("-date_begin")[0]
+		try :
+			return Membership.objects.filter(info=self).order_by("-date_begin")[0]
+		except IndexError :
+			print(u"No membership for %s !" % self)
+			raise
 
 	def make_user( self ) :
 		if self.user is not None :
