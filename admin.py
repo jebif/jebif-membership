@@ -12,3 +12,5 @@ class MembershipInfoAdmin( admin.ModelAdmin ) :
 
 admin.site.register(MembershipInfo, MembershipInfoAdmin)
 
+admin.site.register(Membership)
+

@@ -79,7 +79,7 @@ def end_membership(base=None) :
 
 class Membership( models.Model ) :
 	info = models.ForeignKey(MembershipInfo)
-	date_begin = models.DateField(default=datetime.date.today)
+	date_begin = models.DateField()
 	date_end = models.DateField(default=end_membership)
 
 	def init_date( self, date_begin ) :
