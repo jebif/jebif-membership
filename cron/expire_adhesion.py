@@ -21,8 +21,6 @@ expire = []
 
 for info in MembershipInfo.objects.filter(active=True) :
 	m = info.latter_membership()
-	if info.email == "loic.pauleve@irccyn.ec-nantes.fr" :
-		expired.append(m)
 	if m.has_expired() :
 		expired.append(m)
 	elif m.expire_delta() in [ALERT_1, ALERT_2] :
