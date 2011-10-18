@@ -35,11 +35,14 @@ class MembershipInfo( models.Model ) :
 			raise
 
 	def get_contact_data( self ) :
+		def ensure_ROOT( url ) :
+			if url[1:].startswith(settings.ROOT_URL) :
+				return url
+			else :
+				return "/%s%s" % (settings.ROOT_URL, url[1:])
 		from jebif.membership.views import subscription_renew, subscription_update
-		url_renew = reverse(subscription_renew, kwargs={"info_id": self.id})
-		url_renew = "/%s%s" % (settings.ROOT_URL, url_renew[1:])
-		url_update = reverse(subscription_update, kwargs={"info_id": self.id})
-		url_update = "/%s%s" % (settings.ROOT_URL, url_update[1:])
+		url_renew = ensure_ROOT(reverse(subscription_renew, kwargs={"info_id": self.id}))
+		url_update = ensure_ROOT(reverse(subscription_update, kwargs={"info_id": self.id}))
 		new_passwd = self.make_user()
 		return {
 			"firstname" : self.firstname,

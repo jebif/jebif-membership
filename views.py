@@ -96,6 +96,11 @@ def subscription_update( req, info_id ) :
 		form = MembershipInfoForm(req.POST, instance=info)
 		if form.is_valid() :
 			info = form.save()
+			if info.user is not None :
+				u = info.user
+				if u.email != info.email :
+					u.email = info.email
+					u.save()
 			if info.email != old_email :
 				MembershipInfoEmailChange.objects.create(old_email=old_email, info=info)
 			return direct_to_template(req, "membership/subscription_updated.html", {"membership" : membership})
