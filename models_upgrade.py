@@ -22,12 +22,12 @@ def upgrade_1() :
 def unique_field( model, field_name ) :
 	sqls = []
 	field = [f for f in model._meta.fields if f.name == field_name][0]
-	qn = connection.ops.quota_name
+	qn = connection.ops.quote_name
 	db_table = model._meta.db_table
 	if connection.vendor != "sqlite" :
 		cursor = connection.cursor()
-		cursor.execute("ALTER TABLE %s ADD CONSTRAINT UNIQUE (%s)" % (qn(db_table),
-			qn(field.column))
+		cursor.execute("ALTER TABLE %s ADD UNIQUE (%s)" % (qn(db_table),
+			qn(field.column)))
 		cursor.close()
 
 @commit_on_success
