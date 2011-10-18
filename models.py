@@ -2,9 +2,11 @@
 
 import datetime
 
+from django.conf import settings
 from django.db import models
 from django.db import IntegrityError
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 
 VERSION = 1
@@ -31,6 +33,19 @@ class MembershipInfo( models.Model ) :
 		except IndexError :
 			print(u"No membership for %s !" % self)
 			raise
+
+	def get_contact_data( self ) :
+		from jebif.membership.views import subscription_renew
+		url_renew = reverse(subscription_renew, kwargs={"info_id": self.id})
+		url_renew = "/%s%s" % (settings.ROOT_URL, url_renew[1:])
+		new_passwd = self.make_user()
+		return {
+			"firstname" : self.firstname,
+			"url_renew" : "%s%s" % (settings.HTTP_DOMAIN, url_renew),
+			"login" : self.user.username,
+			"passwd_setup" : " et ton mot de passe '%s'" % new_passwd if new_passwd is not None 
+								else ""
+		}
 
 	def make_user( self ) :
 		if self.user is not None :
