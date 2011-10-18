@@ -1,10 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8
 
 from membership.models import *
 
-infos = MembershipInfo.objects.filter(active=True, deleted=False, 
-				inscription_date=datetime.date.today()-datetime.timedelta(1))
+date = datetime.date.today()-datetime.timedelta(1)
+
+infos = list(MembershipInfo.objects.filter(active=True, deleted=False, inscription_date=date))
+for c in MembershipInfoEmailChange.objects.filter(date=date) :
+	infos.append(c.info)
 
 for info in infos :
 	print (("%s %s <%s>" % (info.firstname, info.lastname, info.email)).encode('utf-8'))

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="{{ MEDIA_URL }}css/jebif.css" type="text/css"/>
+		<title>Adhésion à l'association JeBiF</title>
+	</head>
+	<body>
+
+<h1>Modification de l'adhésion à l'association JeBiF</h1>
+
+<p>Ton adhésion
+{% if membership.date_end < today %}
+	a expirée
+{% else %}
+	expire
+{% endif %}
+le <b>{{ membership.date_end|date }}</b>.</p>
+
+<form action="." method="post">
+	{% if form.errors %}
+		<p class="errornote">Merci de corriger les erreurs ci-dessous.</p>
+	{% endif %}
+	<table class="form">{{ form.as_table }}</table><p>
+	<input type="submit" value="Mettre à jour mes informations"/>
+</p>
+</form>
+
+	</body>
+</html>
+

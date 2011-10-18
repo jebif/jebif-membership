@@ -1,5 +1,6 @@
 # -*- coding: utf-8
 
+from django import forms
 from django.conf import settings
 from django.core.mail import *
 from django.db.transaction import commit_on_success
@@ -7,6 +8,7 @@ from django.shortcuts import *
 from django.views.generic.simple import direct_to_template
 
 from django.contrib.auth.decorators import *
+from django.utils.http import urlquote
 
 import codecs
 import csv
@@ -77,6 +79,70 @@ def subscription_renew( req, info_id ) :
 	return direct_to_template(req, "membership/subscription_renew.html", 
 		{"form": form, "membership": membership, "today": today})
 
+@login_required
+def subscription_update( req, info_id ) :
+	info = MembershipInfo.objects.get(id=info_id)
+	membership = info.latter_membership()
+
+	if info.user != req.user :
+		path = urlquote(req.get_full_path())
+		from django.contrib.auth import REDIRECT_FIELD_NAME
+		tup = settings.LOGIN_URL, REDIRECT_FIELD_NAME, path
+		return HttpResponseRedirect('%s?%s=%s' % tup)
+	
+	old_email = info.email
+
+	if req.method == 'POST' :
+		form = MembershipInfoForm(req.POST, instance=info)
+		if form.is_valid() :
+			info = form.save()
+			if info.email != old_email :
+				MembershipInfoEmailChange.objects.create(old_email=old_email, info=info)
+			return direct_to_template(req, "membership/subscription_updated.html", {"membership" : membership})
+	else :
+		form = MembershipInfoForm(instance=info)
+
+	return direct_to_template(req, "membership/subscription_update.html", 
+		{"form": form, "membership": membership})
+
+
+def subscription_preupdate( req ) :
+
+	class MembershipInfoEmailForm( forms.Form ) :
+		email = forms.EmailField(required=True)
+
+		def clean_email( self ) :
+			data = self.cleaned_data["email"]
+			try :
+				info = MembershipInfo.objects.get(email=data)
+			except MembershipInfo.DoesNotExist :
+				raise forms.ValidationError(u"E-mail inconnu")
+			return info
+	
+	if req.method == "POST" :
+		form = MembershipInfoEmailForm(req.POST)
+		if form.is_valid() :
+			info = form.cleaned_data["email"]
+			data = info.get_contact_data()
+			msg_from = "NO-REPLY@jebif.fr"
+			msg_to = [info.email]
+			msg_subj = u"Ton adhésion à JeBiF"
+			msg_txt = u"""
+Bonjour %(firstname)s,
+
+Tu peux modifier ton adhésion à l'association JeBiF en te rendant sur
+	%(url_update)s
+avec ton identifiant '%(login)s'%(passwd_setup)s.
+
+À bientôt,
+L’équipe du RSG-France (JeBiF)
+		""" % data
+			send_mail(msg_subj, msg_txt, msg_from, msg_to)
+			return direct_to_template(req, "membership/subscription_preupdated.html",
+					{"email" : info.email})
+	else :
+		form = MembershipInfoEmailForm()
+	return direct_to_template(req, "membership/subscription_preupdate.html", {"form": form})
 
 
 def is_admin() :

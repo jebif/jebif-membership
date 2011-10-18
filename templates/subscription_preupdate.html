@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="{{ MEDIA_URL }}css/jebif.css" type="text/css"/>
+		<title>Adhésion à l'association JeBiF</title>
+	</head>
+	<body>
+
+<h1>Modification de l'adhésion à l'association JeBiF</h1>
+
+<p>Pour recevoir les instuctions pour mettre à jour tes informations sur ton adhésion à JeBiF, entre ton e-mail d'adhérent ci-dessous:</p>
+
+<form action="." method="post">
+	{% if form.errors %}
+		<p class="errornote">Merci de corriger les erreurs ci-dessous.</p>
+	{% endif %}
+	<table class="form">{{ form.as_table }}</table><p>
+	<input type="submit" value="Recevoir les instructions"/>
+</p>
+</form>
+
+	</body>
+</html>
+

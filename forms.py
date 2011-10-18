@@ -1,5 +1,5 @@
 
-from django.forms import ModelForm
+from django.forms import ModelForm, Form
 
 import membership.models
 
@@ -10,5 +10,4 @@ class MembershipInfoForm( ModelForm ) :
 						"laboratory_name", "laboratory_cp",
 						"laboratory_city", "laboratory_country",
 						"position", "motivation")
-
 

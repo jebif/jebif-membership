@@ -1,4 +1,6 @@
 #!/bin/bash
+todel=$(`dirname $0`/../bin/list_oldemails|iconv -t latin1)
+[ -n "$todel" ] && /usr/lib/mailman/bin/remove_members Membres $todel
 tmpfile=`mktemp`
 `dirname $0`/../bin/list_newmembers | iconv -t latin1 > $tmpfile
 [ -s $tmpfile ] && /usr/lib/mailman/bin/add_members -r $tmpfile Membres

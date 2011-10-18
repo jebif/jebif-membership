@@ -9,11 +9,11 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 
-VERSION = 1
+VERSION = 2
 
 class MembershipInfo( models.Model ) :
 	user = models.ForeignKey(User, blank=True, null=True)
-	email = models.EmailField()
+	email = models.EmailField(unique=True)
 	firstname = models.CharField("Prénom", max_length=75)
 	lastname = models.CharField("Nom", max_length=75)
 	laboratory_name = models.CharField("Laboratoire", max_length=75)
@@ -35,13 +35,16 @@ class MembershipInfo( models.Model ) :
 			raise
 
 	def get_contact_data( self ) :
-		from jebif.membership.views import subscription_renew
+		from jebif.membership.views import subscription_renew, subscription_update
 		url_renew = reverse(subscription_renew, kwargs={"info_id": self.id})
 		url_renew = "/%s%s" % (settings.ROOT_URL, url_renew[1:])
+		url_update = reverse(subscription_update, kwargs={"info_id": self.id})
+		url_update = "/%s%s" % (settings.ROOT_URL, url_update[1:])
 		new_passwd = self.make_user()
 		return {
 			"firstname" : self.firstname,
 			"url_renew" : "%s%s" % (settings.HTTP_DOMAIN, url_renew),
+			"url_update" : "%s%s" % (settings.HTTP_DOMAIN, url_update),
 			"login" : self.user.username,
 			"passwd_setup" : " et ton mot de passe '%s'" % new_passwd if new_passwd is not None 
 								else ""
@@ -80,6 +83,9 @@ class MembershipInfo( models.Model ) :
 	def __unicode__( self ) :
 		return "%s %s <%s>%s" % (self.firstname, self.lastname,
 								self.email, "" if self.active else " (inactive)")
+	class Meta :
+		verbose_name = "membre"
+
 
 def end_membership(base=None) :
 	d = base
@@ -116,6 +122,10 @@ class Membership( models.Model ) :
 	def __unicode__( self ) :
 		return u"%s/%s %s" % (self.date_begin, self.date_end, self.info)
 
+class MembershipInfoEmailChange( models.Model ) :
+	date = models.DateField(default=datetime.date.today)
+	info = models.ForeignKey(MembershipInfo)
+	old_email = models.EmailField()
 
 class DatabaseInfo( models.Model ) : 
 	""" 
