@@ -162,14 +162,14 @@ def admin_subscription( request ) :
 
 @is_admin()
 def admin_subscription_accept( request, info_id ) :
-	d = datetime.date.today()
-	e = end_membership(d)
 	with commit_on_success() :
 		info = MembershipInfo.objects.get(id=info_id)
 		info.active = True
 		info.inscription_date = datetime.date.today()
-		Membership.objects.create(info=info, date_begin=d, date_end=e)
 		info.save()
+		m = Membership(info=info)
+		m.init_date(info.inscription_date)
+		m.save()
 
 	msg_from = "NO-REPLY@jebif.fr"
 	msg_to = [info.email]
