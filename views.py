@@ -79,6 +79,10 @@ def subscription_renew( req, info_id ) :
 	return direct_to_template(req, "membership/subscription_renew.html", 
 		{"form": form, "membership": membership, "today": today})
 
+@login_required
+def subscription_self_update( req ) :
+	info = MembershipInfo.objects.get(user=req.user)
+	return subscription_update(req, info.id)
 
 @login_required
 def subscription_update( req, info_id ) :
