@@ -79,17 +79,21 @@ def subscription_renew( req, info_id ) :
 	return direct_to_template(req, "membership/subscription_renew.html", 
 		{"form": form, "membership": membership, "today": today})
 
+
 @login_required
 def subscription_update( req, info_id ) :
 	info = MembershipInfo.objects.get(id=info_id)
-	membership = info.latter_membership()
-
 	if info.user != req.user :
 		path = urlquote(req.get_full_path())
 		from django.contrib.auth import REDIRECT_FIELD_NAME
 		tup = settings.LOGIN_URL, REDIRECT_FIELD_NAME, path
 		return HttpResponseRedirect('%s?%s=%s' % tup)
-	
+
+	membership = info.latter_membership()
+
+	if membership.has_expired() :
+		return subscription_renew(req, info_id)
+
 	old_email = info.email
 
 	if req.method == 'POST' :
