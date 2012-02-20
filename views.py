@@ -174,10 +174,10 @@ def admin_subscription_accept( request, info_id ) :
 		info = MembershipInfo.objects.get(id=info_id)
 		info.active = True
 		info.inscription_date = datetime.date.today()
-		info.save()
 		m = Membership(info=info)
 		m.init_date(info.inscription_date)
 		m.save()
+		info.save()
 
 	msg_from = "NO-REPLY@jebif.fr"
 	msg_to = [info.email]
