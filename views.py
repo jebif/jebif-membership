@@ -79,6 +79,10 @@ def subscription_renew( req, info_id ) :
 	return direct_to_template(req, "membership/subscription_renew.html", 
 		{"form": form, "membership": membership, "today": today})
 
+@login_required
+def subscription_self_update( req ) :
+	info = MembershipInfo.objects.get(user=req.user)
+	return subscription_update(req, info.id)
 
 @login_required
 def subscription_update( req, info_id ) :
@@ -170,10 +174,10 @@ def admin_subscription_accept( request, info_id ) :
 		info = MembershipInfo.objects.get(id=info_id)
 		info.active = True
 		info.inscription_date = datetime.date.today()
-		info.save()
 		m = Membership(info=info)
 		m.init_date(info.inscription_date)
 		m.save()
+		info.save()
 
 	msg_from = "NO-REPLY@jebif.fr"
 	msg_to = [info.email]

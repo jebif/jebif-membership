@@ -24,14 +24,13 @@ for info in MembershipInfo.objects.filter(active=True) :
 		expire.append(m)
 
 for m in expired :
+	data = m.info.get_contact_data()
 	try :
 		subprocess.call(["/usr/lib/mailman/bin/remove_members", "Membres", m.info.email])
 	except :
 		pass
 	m.info.active = False
 	m.info.save()
-
-	data = m.info.get_contact_data()
 
 	msg_from = "NO-REPLY@jebif.fr"
 	msg_to = [m.info.email]

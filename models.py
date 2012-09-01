@@ -84,7 +84,7 @@ class MembershipInfo( models.Model ) :
 			return passwd
 
 	def __unicode__( self ) :
-		return "%s %s <%s>%s" % (self.firstname, self.lastname,
+		return u"%s %s <%s>%s" % (self.firstname, self.lastname,
 								self.email, "" if self.active else " (inactive)")
 	class Meta :
 		verbose_name = "membre"
