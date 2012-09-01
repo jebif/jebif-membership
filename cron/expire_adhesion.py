@@ -51,7 +51,7 @@ L’équipe du RSG-France (JeBiF)
 
 for m in expire :
 	data = m.info.get_contact_data()
-	data["expire_date"] = m.date_end.strftime(settings.DATE_INPUT_FORMAT),
+	data["expire_date"] = m.date_end.strftime(settings.DATE_INPUT_FORMAT)
 
 	msg_from = "NO-REPLY@jebif.fr"
 	msg_to = [m.info.email]
