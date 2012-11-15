@@ -33,7 +33,7 @@ Une demande d'adhésion vient d'être postée sur le site. Pour la modérer :
 				settings.SERVER_EMAIL, [a[1] for a in settings.MEMBERSHIP_MANAGERS],
 				fail_silently=True)
 
-			return HttpResponseRedirect("ok")
+			return HttpResponseRedirect("ok/")
 	else :
 		form = MembershipInfoForm()
 

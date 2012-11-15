@@ -5,7 +5,7 @@ from jebif.membership.views import *
 
 urlpatterns = patterns('',
 	('^subscription/$', subscription),
-	('^subscription/ok$', direct_to_template, {"template": "membership/subscription-ok.html"}),
+	('^subscription/ok/$', direct_to_template, {"template": "membership/subscription-ok.html"}),
 	('^subscription/(?P<info_id>\d+)/renew/$', subscription_renew),
 	('^subscription/(?P<info_id>\d+)/update/$', subscription_update),
 	('^subscription/me/update/$', subscription_self_update),

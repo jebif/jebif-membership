@@ -8,6 +8,7 @@ from django.db import IntegrityError
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
+from django.db.transaction import commit_on_success
 
 VERSION = 2
 
@@ -53,6 +54,7 @@ class MembershipInfo( models.Model ) :
 								else ""
 		}
 
+	@commit_on_success
 	def make_user( self ) :
 		if self.user is not None :
 			return None
@@ -73,13 +75,10 @@ class MembershipInfo( models.Model ) :
 			login = base_login
 			salt = 2
 			created = False
-			while not created :
-				try :
-					self.user = User.objects.create_user(login, self.email, passwd)
-					created = True
-				except IntegrityError :
-					login = base_login + "%d" % salt
-					salt += 1
+			while User.objects.filter(username=login).exists() :
+				login = base_login + "%d" % salt
+				salt += 1
+			self.user = User.objects.create_user(login, self.email, passwd)
 			self.save()
 			return passwd
 
